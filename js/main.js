@@ -1,6 +1,7 @@
 var markers = [];
 var map;
-var address;
+// standaard locatie bij inladen map
+var address = 'Utrecht';
 // map inladen
 function initMap() {
     counter =1;
@@ -95,6 +96,20 @@ function initMap() {
     document.getElementById('submit').addEventListener('click', function () {
         // data van input veld
         var address = document.getElementById('location').value;
+        // adress leeg dan fout melding
+        if (!address) {
+            $("#location").before("<div id='alert' class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\">\n" +
+                "  <strong>OEPS!</strong> Voer een geldige locatie in A.U.B.\n" +
+                "  <button type=\"button\" class=\"close\"\n" +
+                "    <span aria-hidden=\"true\">&times;</span>\n" +
+                "  </button>\n" +
+                "</div>");
+            $(".alert").click(function(){
+                $("#alert").remove();
+
+            });
+            return;
+        }
         // plaats marker
         geocodeAddress(address, geocoder,counter);
         // lijnen om stad heen
@@ -122,10 +137,7 @@ function drawCity(cityName) {
 
 // vertaald address naar lat en lan
 function geocodeAddress(address,geocoder,counter, placeMarker = true) {
-    // adress leeg dan standaard utrecht
-    if (address == null) {
-        address = 'Utrecht'
-    }
+
     geocoder.geocode({'address': address}, function (results, status) {
         if (status === 'OK') {
             map.setCenter(results[0].geometry.location);
