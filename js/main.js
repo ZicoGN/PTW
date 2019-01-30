@@ -1,10 +1,8 @@
 var markers = [];
 var map;
-// standaard locatie bij inladen map
-var address = 'Utrecht';
+var address;
 // map inladen
 function initMap() {
-    counter =1;
     // map instellingen
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 10,
@@ -91,35 +89,71 @@ function initMap() {
     });
     // om address te vertalen naar lan en lat
     var geocoder = new google.maps.Geocoder();
-    geocodeAddress(address,geocoder,counter, false);
+    geocodeAddress(address,geocoder,false);
     // on sumbit click voer dit uit
     document.getElementById('submit').addEventListener('click', function () {
-        // data van input veld
-        var address = document.getElementById('location').value;
-        // adress leeg dan fout melding
-        if (!address) {
-            $("#location").before("<div id='alert' class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\">\n" +
-                "  <strong>OEPS!</strong> Voer een geldige locatie in A.U.B.\n" +
-                "  <button type=\"button\" class=\"close\"\n" +
-                "    <span aria-hidden=\"true\">&times;</span>\n" +
-                "  </button>\n" +
-                "</div>");
-            $(".alert").click(function(){
-                $("#alert").remove();
-
-            });
-            return;
-        }
-        // plaats marker
-        geocodeAddress(address, geocoder,counter);
-        // lijnen om stad heen
-        drawCity(address);
-        counter += 1;
+    submitClicked();
+    })
+    document.getElementById('update').addEventListener('click', function () {
+    updatedata();
     })
 }
 
+
+function updatedata() {
+    alert("Wait until finished!")
+    $.ajax({
+            type:'POST',
+            url:'update/',
+            data:{
+                update:"update",
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            //get return
+            success: function(data) {
+                alert(data)
+            }
+        });  
+}
+
+//Post value sliders to DJANGO and get return.
+function submitClicked() {
+    // Remove all marked locations
+    map.data.forEach(function(feature) {
+    map.data.remove(feature);
+    });
+        $.ajax({
+            type:'POST',
+            url:'search/',
+            data:{
+                slider1:JSON.stringify(slider1.noUiSlider.get()),
+                slider2:JSON.stringify(slider2.noUiSlider.get()),
+                slider3:JSON.stringify(slider3.noUiSlider.get()),
+                slider4:JSON.stringify(slider4.noUiSlider.get()),
+                slider5:JSON.stringify(slider5.noUiSlider.get()),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            //get return
+            success: function(data) {
+                if (data != ''){
+                places(data);
+                }
+            }
+        });   
+}
+
+// Markeer places
+function places(list) {
+    const arr = list.split(",");;
+    for (i = 0; i < arr.length; i++) { 
+        drawCity(arr[i], 0.6);
+        console.log(arr[i]);
+    }
+}
+
+
 // teken lijnen om stad heen
-function drawCity(cityName) {
+function drawCity(cityName, opp) {
     $.ajax({
         dataType: "json",
         // json url met benodige geojson data
@@ -128,122 +162,97 @@ function drawCity(cityName) {
             addData = data.features[1];
             map.data.addGeoJson(addData);
             map.data.setStyle({
-                fillColor: 'orange',
-                strokeWeight: 1
+                fillColor: "Orange",
+                strokeWeight: 2,
+                fillOpacity: opp
             });
         }
     });
 }
 
-// vertaald address naar lat en lan
-function geocodeAddress(address,geocoder,counter, placeMarker = true) {
 
+// vertaald address naar lat en lan
+function geocodeAddress(address,geocoder,placeMarker = true) {
+    // adress leeg dan standaard utrecht
+    if (address == null) {
+        address = 'Utrecht'
+    }
     geocoder.geocode({'address': address}, function (results, status) {
         if (status === 'OK') {
             map.setCenter(results[0].geometry.location);
-
-
-            // reset lijen om stad
-            map.data.forEach(function(feature) {
-                map.data.remove(feature);
-            });
-
-            // reset counter en markers
-            deleteMarkers();
-
-
-            if (placeMarker) {
-
-
-                var contentString = '' + counter + '';
-                addMarker(
-                    {
-                        location:results[0].geometry.location,
-                        labelNumber: counter,
-                        content: contentString
-                    })
-            }
-
-        } else {
-            alert('Geocode was not successful for the following reason: ' + status);
-        }
+        } 
     })
 }
 
-// voeg market toe aan maps
-function addMarker(attr) {
-    var marker = new google.maps.Marker({
-        map: map,
-        label: {text:'' + attr.labelNumber + '',color:'white'},
-        position: attr.location
-    });
-    if(attr.content) {
-        var infowindow = new google.maps.InfoWindow({
-            content: attr.content
-        });
-        marker.addListener('click', function() {
-            infowindow.open(map,marker);
-        });
-    }
-    markers.push(marker)
-
-}
-
-// verwijder alle markers
-function deleteMarkers() {
-    for (var i = 0; i < markers.length; i++) {
-        markers[i].setMap(null);
-    }
-
-    markers = [];
-    counter = 1;
-}
-
+//CREATE SLIDERS
 var slider1 = document.getElementById('slider1');
 var slider2 = document.getElementById('slider2');
 var slider3 = document.getElementById('slider3');
+var slider4 = document.getElementById('slider4');
+var slider5 = document.getElementById('slider5');
 
 noUiSlider.create(slider1, {
-    start: [0, 1000],
+    start: [0, 350000],
     connect: true,
     range: {
         'min': 0,
-        'max': 1000
-    },
-    tooltips:[true,true]
-
-});
-
-slider1.noUiSlider.on('change', function() {
-    console.log(priceSlider.noUiSlider.get())
-});
-
+        'max': 350000},
+    tooltips:[true,true],});
 noUiSlider.create(slider2, {
-    start: [0, 1000],
+    start: [1, 94],
     connect: true,
     range: {
-        'min': 0,
-        'max': 1000
-    },
-    tooltips:[true,true]
-
-});
-slider2.noUiSlider.on('change', function() {
-    console.log(priceSlider.noUiSlider.get())
-});
-
+        'min': 1,
+        'max': 94},
+    tooltips:[true,true]});
 noUiSlider.create(slider3, {
-    start: [0, 1000],
+    start: [0, 1500],
     connect: true,
     range: {
         'min': 0,
-        'max': 1000
-    },
-    tooltips:[true,true]
+        'max': 1500},
+    tooltips:[true,true]});
+noUiSlider.create(slider4, {
+    start: [20, 50],
+    connect: true,
+    range: {
+        'min': 25,
+        'max': 50},
+    tooltips:[true,true]});
+noUiSlider.create(slider5, {
+    start: [1, 25],
+    connect: true,
+    range: {
+        'min': 1,
+        'max': 25},
+    tooltips:[true,true]});
 
-});
-slider3.noUiSlider.on('change', function() {
-    console.log(priceSlider.noUiSlider.get())
-});
-
-
+//CHANGE SLIDERS
+function val() {
+    if (document.getElementById("select_id").value == 1)
+{   slider1.noUiSlider.destroy()
+    noUiSlider.create(slider1, {
+    start: [0, 350000],
+    connect: true,
+    range: {
+        'min': 0,
+        'max': 350000},
+    tooltips:[true,true],});}
+if (document.getElementById("select_id").value == 2)
+{   slider1.noUiSlider.destroy()
+    noUiSlider.create(slider1, {
+    start: [0, 50000],
+    connect: true,
+    range: {
+        'min': 0,
+        'max': 50000},
+    tooltips:[true,true],});}
+if (document.getElementById("select_id").value == 3)
+{   slider1.noUiSlider.destroy()
+    noUiSlider.create(slider1, {
+    start: [0, 5000],
+    connect: true,
+    range: {
+        'min': 0,
+        'max': 5000},
+    tooltips:[true,true],});}}
