@@ -8,13 +8,12 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="manifest" href="site.webmanifest">
     <link rel="apple-touch-icon" href="icon.png">
     <!-- Place favicon.ico in the root directory -->
-
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/nouislider.min.css">
-    <link rel="stylesheet" href="css/main.css">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nouislider.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
 </head>
 
 <body>
@@ -31,28 +30,36 @@
             <div class="card fadeInDownBig">
                 <div class="card-body">
 
-                    <form action="javascript:void(0);">
+                    <form action="javascript:void(0)">{% csrf_token %}
                         <div class="row">
                             <div class="col-md-12">
-                                <input type="text" class="form-control" id="location"
-                                       aria-describedby="emailHelp" placeholder="Locatie">
+                                
                             </div>
                         </div>
+                        <select onchange="val()" id="select_id">
+  <option value="1" selected="selected">max 350000</option>
+  <option value="2">max 50000</option>
+  <option value="3">max 5000</option>
+</select>
+<button type="submit" id="update">Update</button>
                         <div class="row justify-content-lg-around">
                             <div class=" col-sm-12 col-md-3">
-                                <span class="text-center d-block">tekst</span>
+                                <span class="text-center d-block">Inwoners voor leeftijd:</span>
                                 <div id="slider1"></div>
                             </div>
                             <div class="col-sm-12 col-md-3">
-                                <span class="text-center d-block">tekst</span>
+                                <span class="text-center d-block">Leeftijd:</span>
                                 <div id="slider2"></div>
                             </div>
                             <div class="col-sm-12 col-md-3 mb-3">
-                                <span class="text-center d-block">tekst</span>
+                                <span class="text-center d-block">Horeca:</span>
                                 <div id="slider3"></div>
                             </div>
                         </div>
-
+                        <span class="text-center d-block">Inkomen:</span>
+                                <div id="slider4"></div>
+                        <span class="text-center d-block">Goenlinks stemmen percentage:</span>
+                                <div id="slider5"></div>
                         <div class="row">
                             <div class="col-md-12 mb-0 mb-sm-3">
                                 <button type="submit" id="submit" class="btn btn-primary">Submit</button>
@@ -67,17 +74,19 @@
 
             </div>
 
-
         </div>
     </div>
 </div>
 
 
+
+<script>
+   var adreslist = '{{ adreslist }}';
+</script>
 <!--<script src="js/vendor/bootstrap.bundle.min.js"></script>-->
-<script src="js/vendor/jquery-3.3.1.min.js"></script>
-<script src="js/vendor/nouislider.js"></script>
-<!--<script src="js/plugins.js"></script>-->
-<script src="js/main.js"></script>
+<script src="{% static 'js/vendor/jquery-3.3.1.min.js' %}""></script>
+<script src="{% static 'js/vendor/nouislider.js' %}""></script>
+<script src="{% static 'js/main.js' %}""></script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIE1T6R5gOydRM0shtt-eGY2xf9bp2ROo&callback=initMap"
         async defer></script>
