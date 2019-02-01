@@ -1,7 +1,8 @@
 var markers = [];
 var map;
 var address;
-var adres = "Utrecht"
+var adres = "Utrecht";
+contentstring = "";
 clicked = 0;
 // map inladen
 function initMap() {
@@ -108,17 +109,25 @@ function initMap() {
 
 
 
-
 // Create marker for the best place
 function geocodeAddress(geocoder, resultsMap, adres) {
     // adress leeg dan standaard utrecht
+
     geocoder.geocode({'address': adres}, function (results, status) {
         if (status === 'OK') {
             resultsMap.setCenter(results[0].geometry.location);
+            
              marker = new google.maps.Marker({
               map: resultsMap,
               position: results[0].geometry.location
             });
+infowindow = new google.maps.InfoWindow({
+          content: contentstring
+        });
+             marker.addListener('click', function() {
+             infowindow.open(resultsMap, marker);
+        });
+
         if (clicked == 0)
         {
             marker.setMap(null);
@@ -168,19 +177,33 @@ function submitClicked(geocoder, map) {
             success: function(data) {
                 if (data != ''){
                 places(data);
+                staddata(data.split(",").slice(-5));
                 marker.setMap(null);
                 adres = "Utrecht"
-                geocodeAddress(geocoder,map,data.split(",").slice(-1)[0]);
-                
+                geocodeAddress(geocoder,map,data.split(",").slice(-5)[0]);
+                }
+                else
+                {
+                    marker.setMap(null);
                 }
             }
         });   
 }
 
+
+function staddata(stad)
+{
+
+        
+                 contentstring = '<h5>'+stad[0]+'</h5><h6>Inwoners: '+stad[1]+'</h6><h6>Horeca vestigingen: '+stad[2]+'</h6><h6>Mediaan inkomen: '+stad[3]+' x 1000,-</h6><h6>percentage GL: '+stad[4]+'%</h6>';
+            
+
+}
+
 // Markeer places
 function places(list) {
     const arr = list.split(",");;
-    for (i = 0; i < arr.length-1; i++) { 
+    for (i = 0; i < arr.length-5; i++) { 
         drawCity(arr[i], 0.6);
         console.log(arr[i]);
     }
@@ -227,8 +250,10 @@ noUiSlider.create(slider2, {
     start: [1, 94],
     connect: true,
     range: {
+
         'min': 1,
         'max': 94},
+
     tooltips:[true,true]});
 noUiSlider.create(slider3, {
     start: [0, 1500],

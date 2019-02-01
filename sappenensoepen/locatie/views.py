@@ -46,6 +46,19 @@ def search(request):
             adreslist += [stad[0]]
         return HttpResponse(getbest(adreslist,slider1,slider2,slider3,slider4,slider5))
 
+def staddata(stad):
+    staddata = stad
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT SUM(bewoners.aantal), horeca.aantal, inkomen.inkomen, partijen.percentage FROM  bewoners, steden, horeca, inkomen, partijen WHERE steden.id = bewoners.id AND inkomen.id = steden.id AND horeca.id = steden.id AND partijen.id = steden.id AND steden.name = '{}'".format(staddata))
+    alleinfo = c.fetchall()
+    inf = ""
+    for info in alleinfo[0]:
+        inf += str(info) + ","
+    inf = inf[:-1]
+    return inf
+
+
 #De algoritme voor de beste plek
 def getbest(adreslist,slider1,slider2,slider3,slider4,slider5):
     try:
@@ -55,12 +68,18 @@ def getbest(adreslist,slider1,slider2,slider3,slider4,slider5):
             dicto.update({adres:0})
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
-        c.execute("SELECT name ,MAX(totaal) FROM(SELECT name, horeca.aantal AS totaal FROM  bewoners, steden, horeca, inkomen, partijen WHERE steden.id = bewoners.id AND inkomen.id = steden.id AND horeca.id = steden.id AND partijen.id = steden.id AND horeca.aantal<={} AND horeca.aantal>={} AND leeftijd<={} AND leeftijd>={} AND inkomen<={} AND inkomen>={} AND percentage<={} AND percentage>={} GROUP BY bewoners.id HAVING SUM(bewoners.aantal) <= {} AND SUM(bewoners.aantal) >= {})".format(slider3[1][:-5],slider3[0][2:-3],slider2[1][:-5],slider2[0][2:-3],slider4[1][:-3],slider4[0][2:-1],slider5[1][:-3],slider5[0][2:-1],slider1[1][:-5],slider1[0][2:-3]))
-        dicto[c.fetchall()[0][0]] += 1
-        c.execute("SELECT name ,MAX(totaal) FROM(SELECT name, percentage AS totaal FROM  bewoners, steden, horeca, inkomen, partijen WHERE steden.id = bewoners.id AND inkomen.id = steden.id AND horeca.id = steden.id AND partijen.id = steden.id AND horeca.aantal<={} AND horeca.aantal>={} AND leeftijd<={} AND leeftijd>={} AND inkomen<={} AND inkomen>={} AND percentage<={} AND percentage>={} GROUP BY bewoners.id HAVING SUM(bewoners.aantal) <= {} AND SUM(bewoners.aantal) >= {})".format(slider3[1][:-5],slider3[0][2:-3],slider2[1][:-5],slider2[0][2:-3],slider4[1][:-3],slider4[0][2:-1],slider5[1][:-3],slider5[0][2:-1],slider1[1][:-5],slider1[0][2:-3]))
-        dicto[c.fetchall()[0][0]] += 1
-        c.execute("SELECT name, MAX(totaal) FROM (SELECT name,(SUM(bewoners.aantal) / horeca.aantal) AS totaal FROM  bewoners, steden, horeca, inkomen, partijen WHERE steden.id = bewoners.id AND inkomen.id = steden.id AND horeca.id = steden.id AND partijen.id = steden.id AND horeca.aantal<={} AND horeca.aantal>={} AND leeftijd<={} AND leeftijd>={} AND inkomen<={} AND inkomen>={} AND percentage<={} AND percentage>={} GROUP BY bewoners.id HAVING SUM(bewoners.aantal) <= {} AND SUM(bewoners.aantal) >= {})".format(slider3[1][:-5],slider3[0][2:-3],slider2[1][:-5],slider2[0][2:-3],slider4[1][:-3],slider4[0][2:-1],slider5[1][:-3],slider5[0][2:-1],slider1[1][:-5],slider1[0][2:-3]))
-        dicto[c.fetchall()[0][0]] += 1
+        c.execute("SELECT name, totaal FROM(SELECT name, inkomen.inkomen AS totaal FROM  bewoners, steden, horeca, inkomen, partijen WHERE steden.id = bewoners.id AND inkomen.id = steden.id AND horeca.id = steden.id AND partijen.id = steden.id AND horeca.aantal<={} AND horeca.aantal>={} AND leeftijd<={} AND leeftijd>={} AND inkomen<={} AND inkomen>={} AND percentage<={} AND percentage>={} GROUP BY bewoners.id HAVING SUM(bewoners.aantal) <= {} AND SUM(bewoners.aantal) >= {}) ORDER BY totaal".format(slider3[1][:-5],slider3[0][2:-3],slider2[1][:-5],slider2[0][2:-3],slider4[1][:-3],slider4[0][2:-1],slider5[1][:-3],slider5[0][2:-1],slider1[1][:-5],slider1[0][2:-3]))
+        uit = c.fetchall()
+        for i in range(len(uit)):
+            dicto[uit[i][0]] += i+1        
+        c.execute("SELECT name ,MAX(totaal) FROM(SELECT name, percentage AS totaal FROM  bewoners, steden, horeca, inkomen, partijen WHERE steden.id = bewoners.id AND inkomen.id = steden.id AND horeca.id = steden.id AND partijen.id = steden.id AND horeca.aantal<={} AND horeca.aantal>={} AND leeftijd<={} AND leeftijd>={} AND inkomen<={} AND inkomen>={} AND percentage<={} AND percentage>={} GROUP BY bewoners.id HAVING SUM(bewoners.aantal) <= {} AND SUM(bewoners.aantal) >= {}) ORDER BY totaal".format(slider3[1][:-5],slider3[0][2:-3],slider2[1][:-5],slider2[0][2:-3],slider4[1][:-3],slider4[0][2:-1],slider5[1][:-3],slider5[0][2:-1],slider1[1][:-5],slider1[0][2:-3]))
+        uit = c.fetchall()
+        for i in range(len(uit)):
+            dicto[uit[i][0]] += i+1 
+        c.execute("SELECT name, MAX(totaal) FROM (SELECT name,(SUM(bewoners.aantal) / horeca.aantal) AS totaal FROM  bewoners, steden, horeca, inkomen, partijen WHERE steden.id = bewoners.id AND inkomen.id = steden.id AND horeca.id = steden.id AND partijen.id = steden.id AND horeca.aantal<={} AND horeca.aantal>={} AND leeftijd<={} AND leeftijd>={} AND inkomen<={} AND inkomen>={} AND percentage<={} AND percentage>={} GROUP BY bewoners.id HAVING SUM(bewoners.aantal) <= {} AND SUM(bewoners.aantal) >= {} ORDER BY totaal)".format(slider3[1][:-5],slider3[0][2:-3],slider2[1][:-5],slider2[0][2:-3],slider4[1][:-3],slider4[0][2:-1],slider5[1][:-3],slider5[0][2:-1],slider1[1][:-5],slider1[0][2:-3]))
+        uit = c.fetchall()
+        for i in range(len(uit)):
+            dicto[uit[i][0]] += i+1 
         maximum = max(dicto, key=dicto.get)
     except:
         maximum = ""
@@ -69,7 +88,7 @@ def getbest(adreslist,slider1,slider2,slider3,slider4,slider5):
             lijst += "Utrecht,"
         else:
             lijst += adres + ","
-    lijst += maximum 
+    lijst = lijst + maximum + ',' + staddata(maximum)
     return lijst
     
 
@@ -207,7 +226,7 @@ def create_inkomen_values(conn):
 
 def create_partijen_values(conn):
     try:
-        with open ("locatie/verkiezingen.csv", 'r', encoding='utf-8') as uitlsagenCSV:
+        with open ("locatie/verkiezingen.csv", 'r', encoding="utf-8") as uitlsagenCSV:
             reader = csv.reader(uitlsagenCSV, delimiter=';')
             for row in reader:
                 for gemeente in gemeentecodes:
