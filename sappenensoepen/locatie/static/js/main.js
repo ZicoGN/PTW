@@ -90,6 +90,9 @@ function initMap() {
             }
         ]
     });
+    
+    
+    
     // om address te vertalen naar lan en lat
     var geocoder = new google.maps.Geocoder();
     geocodeAddress(geocoder,map, adres);
@@ -106,40 +109,32 @@ function initMap() {
 }
 
 
-
-
-
-// Create marker for the best place
+// Maak marker voor de beste locatie
 function geocodeAddress(geocoder, resultsMap, adres) {
-    // adress leeg dan standaard utrecht
-
     geocoder.geocode({'address': adres}, function (results, status) {
         if (status === 'OK') {
             resultsMap.setCenter(results[0].geometry.location);
-            
              marker = new google.maps.Marker({
-              map: resultsMap,
-              position: results[0].geometry.location
-            });
-infowindow = new google.maps.InfoWindow({
-          content: contentstring
-        });
+             map: resultsMap,
+             position: results[0].geometry.location
+             });
+             infowindow = new google.maps.InfoWindow({
+             content: contentstring
+             });
              marker.addListener('click', function() {
              infowindow.open(resultsMap, marker);
-        });
-
+             });
         if (clicked == 0)
         {
             marker.setMap(null);
         }
-
-        } 
-    })
+    } 
+  })
 }
 
 
 
-// Update the database
+// Update de database
 function updatedata() {
     alert("Wait until finished!")
     $.ajax({
@@ -149,7 +144,7 @@ function updatedata() {
                 update:"update",
                 csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
             },
-            //get return
+            //Alert als de database is geupdate
             success: function(data) {
                 alert(data)
             }
@@ -193,11 +188,7 @@ function submitClicked(geocoder, map) {
 
 function staddata(stad)
 {
-
-        
-                 contentstring = '<h5>'+stad[0]+'</h5><h6>Inwoners: '+stad[1]+'</h6><h6>Horeca vestigingen: '+stad[2]+'</h6><h6>Mediaan inkomen: '+stad[3]+' x 1000,-</h6><h6>percentage GL: '+stad[4]+'%</h6>';
-            
-
+    contentstring = '<h5>'+stad[0]+'</h5><h6>Inwoners: '+stad[1]+'</h6><h6>Horeca vestigingen: '+stad[2]+'</h6><h6>Mediaan inkomen: '+stad[3]+' x 1000,-</h6><h6>percentage GL: '+stad[4]+'%</h6>';
 }
 
 // Markeer places
@@ -227,9 +218,6 @@ function drawCity(cityName, opp) {
         }
     });
 }
-
-
-// vertaald address naar lat en lan
 
 
 //CREATE SLIDERS
