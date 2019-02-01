@@ -24,9 +24,8 @@ gemeentecodes = {'Amersfoort': 'GM0307', 'Baarn': 'GM0308', 'De Bilt': 'GM0310',
 
 #Return template
 def index(request):
-    adreslist = "Zeist"
     template = 'index.html'
-    return render(request, template, { "adreslist": adreslist })
+    return render(request, template)
     
 #Get slider data from js and return adreslist 
 def search(request):
