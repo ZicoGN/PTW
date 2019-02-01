@@ -45,6 +45,7 @@ def search(request):
             adreslist += [stad[0]]
         return HttpResponse(getbest(adreslist,slider1,slider2,slider3,slider4,slider5))
 
+#Data voor de beste plek ophalen.
 def staddata(stad):
     staddata = stad
     conn = sqlite3.connect('database.db')
